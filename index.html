@@ -344,10 +344,10 @@
     <div id="today-list"></div>
   </div>
 
-  <!-- ✅ 仕入れ漏れ確認（日付自由選択・四角ボタン・オレンジ） -->
+  <!-- ✅ 仕入れ確認リスト（日付自由選択・四角ボタン・オレンジ） -->
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <div style="font-size:13px;font-weight:700;color:var(--sub);">✅ 仕入れ漏れ確認</div>
+      <div style="font-size:13px;font-weight:700;color:var(--sub);">📋 仕入れ確認リスト</div>
       <div style="display:flex;gap:6px">
         <button class="verify-all-btn" onclick="verifyAll()">全確認</button>
         <button class="load-reset-btn" onclick="resetVerify()">リセット</button>
@@ -782,25 +782,39 @@ function renderVerifySection() {
     el.innerHTML = '<div style="text-align:center;padding:16px;color:var(--sub);font-size:14px">この日の登録がありません</div>';
     return;
   }
-  // 未確認を先頭に
-  const sorted = [
-    ...rec.filter(r => !verified[r.id]),
-    ...rec.filter(r =>  verified[r.id])
-  ];
-  el.innerHTML = sorted.map(r => {
-    const done = !!verified[r.id];
+  // 問屋ごとにグループ化
+  const bySupplier = {};
+  rec.forEach(r => {
+    if (!bySupplier[r.supplier]) bySupplier[r.supplier] = [];
+    bySupplier[r.supplier].push(r);
+  });
+  el.innerHTML = Object.entries(bySupplier).map(([sup, items]) => {
+    const allDone = items.every(r => !!verified[r.id]);
+    const rows = [
+      ...items.filter(r => !verified[r.id]),
+      ...items.filter(r =>  verified[r.id])
+    ].map(r => {
+      const done = !!verified[r.id];
+      return `
+      <div class="today-list-item${done ? ' done' : ''}">
+        <button class="verify-btn${done ? ' done' : ''}" onclick="toggleVerify('${r.id}')">
+          ${done ? '✓' : ''}
+        </button>
+        <div class="fi">${fe(r.name)}</div>
+        <div class="tl-info">
+          <div class="tl-name">${r.name}</div>
+          <div class="tl-detail">${r.qty} × ¥${r.price.toLocaleString()}</div>
+        </div>
+        <div class="tl-price">¥${(r.qty*r.price).toLocaleString()}</div>
+        <button class="tl-edit" onclick="editRec('${r.id}')">✏️</button>
+      </div>`;
+    }).join('');
     return `
-    <div class="today-list-item${done ? ' done' : ''}">
-      <button class="verify-btn${done ? ' done' : ''}" onclick="toggleVerify('${r.id}')">
-        ${done ? '✓' : ''}
-      </button>
-      <div class="fi">${fe(r.name)}</div>
-      <div class="tl-info">
-        <div class="tl-name">${r.name}</div>
-        <div class="tl-detail">${r.qty} × ¥${r.price.toLocaleString()} ／ ${r.supplier}</div>
+    <div style="margin-bottom:12px;">
+      <div style="font-size:12px;font-weight:700;color:${allDone?'var(--success)':'var(--accent)'};padding:6px 2px;display:flex;align-items:center;gap:6px;border-bottom:2px solid ${allDone?'var(--success)':'var(--accent)'};margin-bottom:4px;">
+        🏪 ${sup} ${allDone?'<span style="font-size:11px;">✅ 確認済み</span>':''}
       </div>
-      <div class="tl-price">¥${(r.qty*r.price).toLocaleString()}</div>
-      <button class="tl-edit" onclick="editRec('${r.id}')">✏️</button>
+      ${rows}
     </div>`;
   }).join('');
 }
@@ -824,6 +838,7 @@ function addRecord() {
   LS.saveRec(rec);
   refreshDL();
   renderTodayQuick();
+  renderVerifySection();
   showToast('✅ ' + name + ' ¥'+(qty*price).toLocaleString() + ' 登録！');
   document.getElementById('inp-name').value     = '';
   document.getElementById('inp-supplier').value = '';
@@ -1147,35 +1162,129 @@ function showToast(msg) {
   setTimeout(()=>t.classList.remove('show'),2500);
 }
 
-// ===== PWAアイコン =====
+// ===== PWAアイコン（モダンデザイン） =====
 function setupPWAIcon() {
-  const S=512, canvas=document.createElement('canvas');
-  canvas.width=S; canvas.height=S;
-  const ctx=canvas.getContext('2d'), sc=S/180, r=36*sc;
+  const S = 512;
+  const canvas = document.createElement('canvas');
+  canvas.width = S; canvas.height = S;
+  const ctx = canvas.getContext('2d');
+
+  // 角丸クリップ
+  const rad = S * 0.22;
   ctx.beginPath();
-  ctx.moveTo(r,0);ctx.lineTo(S-r,0);ctx.arcTo(S,0,S,r,r);ctx.lineTo(S,S-r);
-  ctx.arcTo(S,S,S-r,S,r);ctx.lineTo(r,S);ctx.arcTo(0,S,0,S-r,r);ctx.lineTo(0,r);ctx.arcTo(0,0,r,0,r);
-  ctx.closePath();ctx.save();ctx.clip();
-  const bg=ctx.createLinearGradient(0,0,0,S);bg.addColorStop(0,'#0096c7');bg.addColorStop(1,'#023e8a');
-  ctx.fillStyle=bg;ctx.fillRect(0,0,S,S);
-  ctx.save();ctx.translate(S*0.46,S*0.40);
-  ctx.beginPath();ctx.moveTo(50*sc,0);ctx.lineTo(82*sc,-30*sc);ctx.lineTo(88*sc,0);ctx.lineTo(82*sc,30*sc);ctx.closePath();ctx.fillStyle='rgba(255,255,255,0.90)';ctx.fill();
-  ctx.beginPath();ctx.ellipse(0,0,60*sc,30*sc,0,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,0.97)';ctx.fill();
-  ctx.beginPath();ctx.arc(-38*sc,-6*sc,9*sc,0,Math.PI*2);ctx.fillStyle='#023e8a';ctx.fill();
-  ctx.beginPath();ctx.arc(-41*sc,-9*sc,3.5*sc,0,Math.PI*2);ctx.fillStyle='white';ctx.fill();
+  ctx.moveTo(rad, 0); ctx.lineTo(S-rad, 0);
+  ctx.arcTo(S,0,S,rad,rad); ctx.lineTo(S,S-rad);
+  ctx.arcTo(S,S,S-rad,S,rad); ctx.lineTo(rad,S);
+  ctx.arcTo(0,S,0,S-rad,rad); ctx.lineTo(0,rad);
+  ctx.arcTo(0,0,rad,0,rad); ctx.closePath();
+  ctx.save(); ctx.clip();
+
+  // 背景：深みのあるネイビー→シアングラデーション
+  const bg = ctx.createLinearGradient(0, 0, S, S);
+  bg.addColorStop(0, '#0a2342');
+  bg.addColorStop(0.5, '#1a5276');
+  bg.addColorStop(1, '#0e6655');
+  ctx.fillStyle = bg; ctx.fillRect(0,0,S,S);
+
+  // 右下の光彩
+  const glow = ctx.createRadialGradient(S*0.75, S*0.75, 0, S*0.75, S*0.75, S*0.5);
+  glow.addColorStop(0, 'rgba(22,160,133,0.35)');
+  glow.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = glow; ctx.fillRect(0,0,S,S);
+
+  // 波（下部）
+  ctx.beginPath();
+  ctx.moveTo(0, S*0.78);
+  ctx.bezierCurveTo(S*0.25,S*0.68, S*0.55,S*0.85, S,S*0.72);
+  ctx.lineTo(S,S); ctx.lineTo(0,S); ctx.closePath();
+  ctx.fillStyle = 'rgba(255,255,255,0.06)'; ctx.fill();
+
+  ctx.beginPath();
+  ctx.moveTo(0, S*0.88);
+  ctx.bezierCurveTo(S*0.30,S*0.80, S*0.65,S*0.94, S,S*0.84);
+  ctx.lineTo(S,S); ctx.lineTo(0,S); ctx.closePath();
+  ctx.fillStyle = 'rgba(255,255,255,0.04)'; ctx.fill();
+
+  // 魚（モダン・フラット）
+  ctx.save();
+  ctx.translate(S*0.48, S*0.42);
+
+  // 尾ひれ
+  ctx.beginPath();
+  ctx.moveTo(S*0.18, 0);
+  ctx.lineTo(S*0.30, -S*0.10);
+  ctx.lineTo(S*0.32, 0);
+  ctx.lineTo(S*0.30, S*0.10);
+  ctx.closePath();
+  const tailGrad = ctx.createLinearGradient(S*0.18,0,S*0.32,0);
+  tailGrad.addColorStop(0,'rgba(255,255,255,0.6)');
+  tailGrad.addColorStop(1,'rgba(255,255,255,0.3)');
+  ctx.fillStyle = tailGrad; ctx.fill();
+
+  // 胴体
+  ctx.beginPath();
+  ctx.ellipse(0, 0, S*0.19, S*0.10, 0, 0, Math.PI*2);
+  const bodyGrad = ctx.createLinearGradient(-S*0.19,0,S*0.19,0);
+  bodyGrad.addColorStop(0,'rgba(255,255,255,0.95)');
+  bodyGrad.addColorStop(1,'rgba(200,230,255,0.90)');
+  ctx.fillStyle = bodyGrad; ctx.fill();
+
+  // 背びれ
+  ctx.beginPath();
+  ctx.moveTo(-S*0.04, -S*0.09);
+  ctx.bezierCurveTo(S*0.04,-S*0.18, S*0.12,-S*0.18, S*0.14,-S*0.09);
+  ctx.closePath();
+  ctx.fillStyle='rgba(255,255,255,0.55)'; ctx.fill();
+
+  // 目
+  ctx.beginPath();
+  ctx.arc(-S*0.12, -S*0.02, S*0.025, 0, Math.PI*2);
+  ctx.fillStyle='#0a2342'; ctx.fill();
+  ctx.beginPath();
+  ctx.arc(-S*0.125, -S*0.03, S*0.009, 0, Math.PI*2);
+  ctx.fillStyle='rgba(255,255,255,0.9)'; ctx.fill();
+
+  // ウロコ（小さな半円）
+  for(let i=0;i<3;i++){
+    ctx.beginPath();
+    ctx.arc(-S*0.02+i*S*0.055, S*0.01, S*0.028, Math.PI, 0);
+    ctx.strokeStyle='rgba(100,180,255,0.4)';
+    ctx.lineWidth=2;
+    ctx.stroke();
+  }
   ctx.restore();
-  ctx.textAlign='center';ctx.fillStyle='rgba(255,255,255,0.98)';
-  ctx.font=`900 ${26*sc}px "Hiragino Sans",sans-serif`;ctx.fillText('小川鮮魚',S*0.5,S*0.82);
+
+  // テキスト「小川鮮魚」
+  ctx.textAlign = 'center';
+  ctx.shadowColor = 'rgba(0,0,0,0.4)';
+  ctx.shadowBlur = 8;
+  ctx.fillStyle = 'white';
+  ctx.font = `800 ${S*0.115}px "Hiragino Sans","Noto Sans JP",sans-serif`;
+  ctx.fillText('小川鮮魚', S*0.5, S*0.80);
+
+  // サブ「仕入帳」
+  ctx.shadowBlur = 0;
+  ctx.font = `500 ${S*0.065}px "Hiragino Sans","Noto Sans JP",sans-serif`;
+  ctx.fillStyle = 'rgba(150,220,210,0.9)';
+  ctx.fillText('仕 入 帳', S*0.5, S*0.91);
+
   ctx.restore();
-  const iconData=canvas.toDataURL('image/png');
-  let link=document.querySelector("link[rel='apple-touch-icon']");
-  if(!link){link=document.createElement('link');link.rel='apple-touch-icon';document.head.appendChild(link);}
-  link.href=iconData;
-  const manifest={name:'小川鮮魚 仕入帳',short_name:'小川鮮魚',start_url:'./',display:'standalone',background_color:'#023e8a',theme_color:'#0096c7',icons:[{src:iconData,sizes:'512x512',type:'image/png'}]};
-  const blob=new Blob([JSON.stringify(manifest)],{type:'application/json'});
-  let mlink=document.querySelector("link[rel='manifest']");
-  if(!mlink){mlink=document.createElement('link');mlink.rel='manifest';document.head.appendChild(mlink);}
-  mlink.href=URL.createObjectURL(blob);
+
+  const iconData = canvas.toDataURL('image/png');
+  let link = document.querySelector("link[rel='apple-touch-icon']");
+  if (!link) { link=document.createElement('link'); link.rel='apple-touch-icon'; document.head.appendChild(link); }
+  link.href = iconData;
+
+  const manifest = {
+    name:'小川鮮魚 仕入帳', short_name:'小川鮮魚',
+    start_url:'./', display:'standalone',
+    background_color:'#0a2342', theme_color:'#1a5276',
+    icons:[{src:iconData, sizes:'512x512', type:'image/png'}]
+  };
+  const blob = new Blob([JSON.stringify(manifest)],{type:'application/json'});
+  let mlink = document.querySelector("link[rel='manifest']");
+  if (!mlink) { mlink=document.createElement('link'); mlink.rel='manifest'; document.head.appendChild(mlink); }
+  mlink.href = URL.createObjectURL(blob);
 }
 
 // ===== 初期化 =====
