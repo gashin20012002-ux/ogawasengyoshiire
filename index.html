@@ -445,71 +445,6 @@
 
 <!-- ========== 管理タブ ========== -->
 <div class="tab" id="tab-master">
-  <!-- 店名設定 -->
-  <div class="card">
-    <div class="card-title">🏪 店名設定</div>
-    <div class="form-group">
-      <label>店名</label>
-      <input type="text" id="shop-name-input" placeholder="例：小川鮮魚" inputmode="text">
-    </div>
-    <button onclick="saveShopName()" style="width:100%;padding:13px;background:var(--primary);color:white;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer">💾 店名を保存</button>
-  </div>
-
-  <div class="card">
-    <div class="card-title">📥 CSVエクスポート（Excel用）</div>
-    <div style="margin-bottom:12px">
-      <label style="margin-bottom:6px">期間を選択</label>
-      <div style="display:flex;gap:8px;margin-bottom:10px">
-        <select id="exp-month" style="flex:1;padding:11px 10px;font-size:15px"><option value="">すべての月</option></select>
-      </div>
-      <div style="display:flex;gap:8px">
-        <button onclick="exportCSV('all')" style="flex:1;padding:13px;background:var(--success);color:white;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer">📥 全データをCSV出力</button>
-      </div>
-      <button onclick="exportCSV('month')" style="width:100%;margin-top:8px;padding:13px;background:#eff6ff;color:var(--primary);border:1.5px solid #bfdbfe;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer">📅 選択した月だけ出力</button>
-    </div>
-    <p style="font-size:11px;color:var(--sub)">※ CSVファイルをダウンロードしてExcelで開けます。</p>
-  </div>
-  <div class="card">
-    <div class="card-title">⚙️ 売価計算の初期設定</div>
-    <div class="form-group">
-      <label>手数料種別（デフォルト）</label>
-      <select id="cfg-fee-type" style="padding:12px 10px;font-size:15px;border:1.5px solid var(--border);border-radius:10px;width:100%">
-        <option value="pct">率（%）</option><option value="fixed">固定額（円）</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label id="cfg-fee-label">手数料率（%）デフォルト値</label>
-      <input type="number" id="cfg-fee" placeholder="例：10" min="0" step="0.1" inputmode="decimal">
-    </div>
-    <div class="form-group">
-      <label>消費税率</label>
-      <select id="cfg-tax" style="padding:12px 10px;font-size:15px;border:1.5px solid var(--border);border-radius:10px;width:100%">
-        <option value="10">10%（標準税率）</option><option value="8">8%（軽減税率）</option><option value="0">0%（税抜のみ）</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>デフォルト値入率（%）</label>
-      <input type="number" id="cfg-markup" placeholder="例：40" min="0" max="99" step="1" inputmode="numeric">
-    </div>
-    <button onclick="saveSettings()" style="width:100%;padding:13px;background:var(--primary);color:white;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer">💾 設定を保存</button>
-  </div>
-  <div class="card">
-    <div class="card-title">🐟 品名マスタ</div>
-    <div class="tag-list" id="name-tags"></div>
-    <div class="add-row">
-      <input type="text" id="new-name" placeholder="新しい品名">
-      <button onclick="addName()">追加</button>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-title">🏪 問屋マスタ</div>
-    <div class="tag-list" id="sup-tags"></div>
-    <div class="add-row">
-      <input type="text" id="new-sup" placeholder="新しい問屋名">
-      <button onclick="addSup()">追加</button>
-    </div>
-  </div>
-
   <!-- 取扱説明書 -->
   <div class="card">
     <div class="card-title">📖 取扱説明書</div>
@@ -607,6 +542,72 @@
       </div>
     </div>
 
+  </div>
+
+
+  <!-- 店名設定 -->
+  <div class="card">
+    <div class="card-title">🏪 店名設定</div>
+    <div class="form-group">
+      <label>店名</label>
+      <input type="text" id="shop-name-input" placeholder="例：小川鮮魚" inputmode="text">
+    </div>
+    <button onclick="saveShopName()" style="width:100%;padding:13px;background:var(--primary);color:white;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer">💾 店名を保存</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📥 CSVエクスポート（Excel用）</div>
+    <div style="margin-bottom:12px">
+      <label style="margin-bottom:6px">期間を選択</label>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <select id="exp-month" style="flex:1;padding:11px 10px;font-size:15px"><option value="">すべての月</option></select>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button onclick="exportCSV('all')" style="flex:1;padding:13px;background:var(--success);color:white;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer">📥 全データをCSV出力</button>
+      </div>
+      <button onclick="exportCSV('month')" style="width:100%;margin-top:8px;padding:13px;background:#eff6ff;color:var(--primary);border:1.5px solid #bfdbfe;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer">📅 選択した月だけ出力</button>
+    </div>
+    <p style="font-size:11px;color:var(--sub)">※ CSVファイルをダウンロードしてExcelで開けます。</p>
+  </div>
+  <div class="card">
+    <div class="card-title">⚙️ 売価計算の初期設定</div>
+    <div class="form-group">
+      <label>手数料種別（デフォルト）</label>
+      <select id="cfg-fee-type" style="padding:12px 10px;font-size:15px;border:1.5px solid var(--border);border-radius:10px;width:100%">
+        <option value="pct">率（%）</option><option value="fixed">固定額（円）</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label id="cfg-fee-label">手数料率（%）デフォルト値</label>
+      <input type="number" id="cfg-fee" placeholder="例：10" min="0" step="0.1" inputmode="decimal">
+    </div>
+    <div class="form-group">
+      <label>消費税率</label>
+      <select id="cfg-tax" style="padding:12px 10px;font-size:15px;border:1.5px solid var(--border);border-radius:10px;width:100%">
+        <option value="10">10%（標準税率）</option><option value="8">8%（軽減税率）</option><option value="0">0%（税抜のみ）</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>デフォルト値入率（%）</label>
+      <input type="number" id="cfg-markup" placeholder="例：40" min="0" max="99" step="1" inputmode="numeric">
+    </div>
+    <button onclick="saveSettings()" style="width:100%;padding:13px;background:var(--primary);color:white;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer">💾 設定を保存</button>
+  </div>
+  <div class="card">
+    <div class="card-title">🐟 品名マスタ</div>
+    <div class="tag-list" id="name-tags"></div>
+    <div class="add-row">
+      <input type="text" id="new-name" placeholder="新しい品名">
+      <button onclick="addName()">追加</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">🏪 問屋マスタ</div>
+    <div class="tag-list" id="sup-tags"></div>
+    <div class="add-row">
+      <input type="text" id="new-sup" placeholder="新しい問屋名">
+      <button onclick="addSup()">追加</button>
+    </div>
   </div>
 
   <!-- 開発者情報 -->
