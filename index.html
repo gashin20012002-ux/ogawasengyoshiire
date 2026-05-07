@@ -244,6 +244,29 @@
   .ac-item { padding: 13px 16px; font-size: 16px; border-bottom: 1px solid var(--border); cursor: pointer; }
   .ac-item:last-child { border-bottom: none; }
   .ac-item:active, .ac-item:hover { background: #eff6ff; }
+  /* カスタムカレンダー */
+  .date-display-btn {
+    width: 100%; padding: 13px 14px;
+    border: 1.5px solid var(--border); border-radius: 10px;
+    font-size: 16px; color: var(--text); background: white;
+    cursor: pointer; text-align: left;
+    display: flex; align-items: center; gap: 8px;
+    -webkit-appearance: none;
+  }
+  .date-display-btn:focus { border-color: var(--primary); outline: none; }
+  .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .cal-nav { background: none; border: 1px solid var(--border); border-radius: 8px; padding: 6px 14px; font-size: 20px; cursor: pointer; color: var(--text); }
+  #cal-title { font-size: 16px; font-weight: 800; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+  .cal-dow { text-align: center; font-size: 11px; font-weight: 700; color: var(--sub); padding: 4px 0; }
+  .cal-day { text-align: center; padding: 9px 2px; border-radius: 8px; font-size: 14px; cursor: pointer; transition: all 0.15s; }
+  .cal-day:active { transform: scale(0.88); }
+  .cal-day.other-month { color: var(--border); }
+  .cal-day.has-records { background: var(--primary-light); color: var(--primary); font-weight: 800; }
+  .cal-day.is-today { border: 2px solid var(--primary); font-weight: 700; }
+  .cal-day.selected { background: var(--primary) !important; color: white !important; font-weight: 800; }
+  .cal-legend { display: flex; gap: 8px; margin-top: 12px; font-size: 12px; color: var(--sub); align-items: center; }
+  .cal-legend-dot { width: 14px; height: 14px; border-radius: 4px; flex-shrink: 0; }
   /* 編集モーダル */
   .modal-overlay {
     display: none; position: fixed; inset: 0;
@@ -287,7 +310,10 @@
     <div class="card-title">⚡ 高速入力</div>
     <div class="form-group">
       <label>日付</label>
-      <input type="date" id="inp-date" onchange="renderTodayQuick()">
+      <button class="date-display-btn" onclick="openCal('inp-date')">
+        <span>📅</span><span id="inp-date-display">日付を選択</span>
+      </button>
+      <input type="hidden" id="inp-date">
     </div>
     <div class="form-group">
       <label>品名</label>
@@ -355,7 +381,10 @@
     </div>
     <!-- 日付選択 -->
     <div class="verify-date-row">
-      <input type="date" id="verify-date" onchange="renderVerifySection()">
+      <button class="date-display-btn" onclick="openCal('verify-date')" style="flex:1;">
+        <span>📅</span><span id="verify-date-display">日付を選択</span>
+      </button>
+      <input type="hidden" id="verify-date">
       <div id="verify-status-badge"></div>
     </div>
     <div class="verify-progress">
@@ -567,6 +596,28 @@
   <button onclick="sw('master',this)"><span class="icon">⚙️</span>管理</button>
 </nav>
 
+<!-- ========== カレンダーモーダル ========== -->
+<div class="modal-overlay" id="cal-modal" onclick="closeCalOutside(event)">
+  <div class="modal-sheet" style="padding-bottom:28px;">
+    <div class="modal-header">
+      <div class="modal-title">📅 日付を選択</div>
+      <button class="modal-close" onclick="closeCal()">×</button>
+    </div>
+    <div class="cal-header">
+      <button class="cal-nav" onclick="prevMonth()">‹</button>
+      <div id="cal-title"></div>
+      <button class="cal-nav" onclick="nextMonth()">›</button>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+    <div class="cal-legend">
+      <div class="cal-legend-dot" style="background:var(--primary-light);border:1px solid var(--primary);"></div>
+      <span>仕入れあり</span>
+      <div class="cal-legend-dot" style="background:var(--primary);margin-left:10px;"></div>
+      <span>選択中</span>
+    </div>
+  </div>
+</div>
+
 <!-- ========== 編集モーダル ========== -->
 <div class="modal-overlay" id="edit-modal" onclick="closeEditOutside(event)">
   <div class="modal-sheet">
@@ -608,16 +659,7 @@
 
 <script>
 // ===== 初期データ =====
-const INIT_RECORDS = [
-  {id:'i1',date:'2026-05-01',name:'アジ',    qty:1,  price:500,supplier:'中尾'},
-  {id:'i2',date:'2026-05-01',name:'サバ',    qty:2,  price:500,supplier:'大石'},
-  {id:'i3',date:'2026-05-01',name:'カンパチ',qty:1.5,price:500,supplier:'工藤'},
-  {id:'i4',date:'2026-05-01',name:'カツオ',  qty:3,  price:500,supplier:'ゲイコー'},
-  {id:'i5',date:'2026-05-01',name:'太刀魚',  qty:1,  price:500,supplier:'古閑'},
-  {id:'i6',date:'2026-05-01',name:'イカ',    qty:2,  price:500,supplier:'松屋'},
-  {id:'i7',date:'2026-05-01',name:'タコ',    qty:3,  price:500,supplier:'中尾'},
-  {id:'i8',date:'2026-05-01',name:'シジミ',  qty:5,  price:500,supplier:'大石'},
-];
+const INIT_RECORDS = [];
 const INIT_NAMES = ['アジ','サバ','カンパチ','カツオ','太刀魚','イカ','タコ','シジミ','マグロ','ブリ','タイ','ヒラメ','エビ','カニ'];
 const INIT_SUPS  = ['中尾','大石','工藤','ゲイコー','古閑','松屋'];
 const FE = {アジ:'🐟',サバ:'🐟',カンパチ:'🐠',カツオ:'🐟',太刀魚:'🐡',イカ:'🦑',タコ:'🐙',シジミ:'🦪',マグロ:'🐟',ブリ:'🐟',タイ:'🐡',ヒラメ:'🐟',エビ:'🦐',カニ:'🦀'};
@@ -1321,6 +1363,68 @@ function setupPWAIcon(shopName) {
   mlink.href = URL.createObjectURL(blob);
 }
 
+// ===== カスタムカレンダー =====
+let calTarget = null, calYear = new Date().getFullYear(), calMonth = new Date().getMonth();
+function openCal(targetId) {
+  calTarget = targetId;
+  const val = document.getElementById(targetId).value || today();
+  calYear = parseInt(val.split('-')[0]);
+  calMonth = parseInt(val.split('-')[1]) - 1;
+  renderCal();
+  document.getElementById('cal-modal').classList.add('show');
+}
+function closeCal() { document.getElementById('cal-modal').classList.remove('show'); }
+function closeCalOutside(e) { if (e.target===document.getElementById('cal-modal')) closeCal(); }
+function prevMonth() { calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCal(); }
+function nextMonth() { calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCal(); }
+function renderCal() {
+  const recordDates = new Set(LS.records().map(r=>r.date));
+  const selectedVal = document.getElementById(calTarget).value;
+  const todayStr = today();
+  const months=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  document.getElementById('cal-title').textContent = `${calYear}年 ${months[calMonth]}`;
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const lastDate = new Date(calYear, calMonth+1, 0).getDate();
+  const prevLastDate = new Date(calYear, calMonth, 0).getDate();
+  const dow = ['日','月','火','水','木','金','土'];
+  let html = dow.map(d=>`<div class="cal-dow${d==='日'?' style="color:var(--danger)"':d==='土'?' style="color:var(--primary)"':''}">${d}</div>`).join('');
+  // 前月
+  for(let i=0;i<firstDay;i++){
+    const d=prevLastDate-firstDay+1+i;
+    const pm=calMonth===0?12:calMonth; const py=calMonth===0?calYear-1:calYear;
+    const ds=`${py}-${String(pm).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    html+=`<div class="cal-day other-month${recordDates.has(ds)?' has-records':''}${ds===selectedVal?' selected':''}" onclick="selectCalDate('${ds}')">${d}</div>`;
+  }
+  // 当月
+  for(let d=1;d<=lastDate;d++){
+    const ds=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    let cls='cal-day';
+    if(recordDates.has(ds)) cls+=' has-records';
+    if(ds===selectedVal) cls+=' selected';
+    if(ds===todayStr) cls+=' is-today';
+    const isSun = new Date(calYear,calMonth,d).getDay()===0;
+    const isSat = new Date(calYear,calMonth,d).getDay()===6;
+    const color = ds===selectedVal?'' : isSun?'color:var(--danger);':isSat?'color:var(--primary);':'';
+    html+=`<div class="${cls}" style="${color}" onclick="selectCalDate('${ds}')">${d}</div>`;
+  }
+  // 翌月
+  const total=Math.ceil((firstDay+lastDate)/7)*7;
+  for(let d=1;d<=total-firstDay-lastDate;d++){
+    const nm=calMonth===11?1:calMonth+2; const ny=calMonth===11?calYear+1:calYear;
+    const ds=`${ny}-${String(nm).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    html+=`<div class="cal-day other-month${recordDates.has(ds)?' has-records':''}${ds===selectedVal?' selected':''}" onclick="selectCalDate('${ds}')">${d}</div>`;
+  }
+  document.getElementById('cal-grid').innerHTML = html;
+}
+function selectCalDate(dateStr) {
+  document.getElementById(calTarget).value = dateStr;
+  const disp = document.getElementById(calTarget+'-display');
+  if(disp) disp.textContent = fmtFull(dateStr);
+  closeCal();
+  if(calTarget==='inp-date') renderTodayQuick();
+  else if(calTarget==='verify-date') renderVerifySection();
+}
+
 // ===== 店名 =====
 function loadShopName() { return localStorage.getItem('sk_shop') || ''; }
 function saveShopName() {
@@ -1342,6 +1446,8 @@ function init() {
   const t=today();
   document.getElementById('inp-date').value    = t;
   document.getElementById('verify-date').value = t;
+  document.getElementById('inp-date-display').textContent    = fmtFull(t);
+  document.getElementById('verify-date-display').textContent = fmtFull(t);
   document.getElementById('hdate').textContent = fmtFull(t);
   refreshDL();
   renderTodayQuick();
