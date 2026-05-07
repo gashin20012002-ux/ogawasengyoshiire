@@ -267,6 +267,37 @@
   .cal-day.selected { background: var(--primary) !important; color: white !important; font-weight: 800; }
   .cal-legend { display: flex; gap: 8px; margin-top: 12px; font-size: 12px; color: var(--sub); align-items: center; }
   .cal-legend-dot { width: 14px; height: 14px; border-radius: 4px; flex-shrink: 0; }
+  /* 取扱説明書アコーディオン */
+  .man-sec {
+    border: 1.5px solid var(--border); border-radius: 10px;
+    margin-bottom: 8px; overflow: hidden; cursor: pointer;
+  }
+  .man-head {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 14px; font-size: 14px; font-weight: 700; color: var(--text);
+    background: #f8fafc;
+  }
+  .man-arr { font-size: 12px; color: var(--sub); transition: transform 0.2s; }
+  .man-sec.open .man-arr { transform: rotate(180deg); }
+  .man-body {
+    display: none; padding: 14px; background: white;
+    border-top: 1px solid var(--border);
+  }
+  .man-sec.open .man-body { display: block; }
+  .man-step {
+    display: flex; gap: 10px; align-items: flex-start;
+    margin-bottom: 10px; font-size: 13px; line-height: 1.6;
+  }
+  .man-step:last-of-type { margin-bottom: 0; }
+  .man-num {
+    min-width: 24px; height: 24px; background: var(--primary); color: white;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 800; flex-shrink: 0; margin-top: 1px;
+  }
+  .man-note {
+    background: #fffbeb; border: 1px solid var(--yellow); border-radius: 8px;
+    padding: 9px 12px; font-size: 12px; color: #92400e; margin-top: 10px; line-height: 1.5;
+  }
   /* 編集モーダル */
   .modal-overlay {
     display: none; position: fixed; inset: 0;
@@ -477,6 +508,105 @@
       <input type="text" id="new-sup" placeholder="新しい問屋名">
       <button onclick="addSup()">追加</button>
     </div>
+  </div>
+
+  <!-- 取扱説明書 -->
+  <div class="card">
+    <div class="card-title">📖 取扱説明書</div>
+    <p style="font-size:12px;color:var(--sub);margin-bottom:12px;">項目をタップすると説明が開きます</p>
+
+    <!-- 入力タブ -->
+    <div class="man-sec" onclick="toggleMan(this)">
+      <div class="man-head"><span>✏️ 仕入れを登録する</span><span class="man-arr">▼</span></div>
+      <div class="man-body">
+        <div class="man-step"><span class="man-num">①</span><div><b>日付</b>を選ぶ。カレンダーが開き、すでに仕入れのある日は<span style="background:var(--primary-light);color:var(--primary);border-radius:4px;padding:1px 6px;font-weight:700;">青く</span>表示されます。</div></div>
+        <div class="man-step"><span class="man-num">②</span><div><b>品名</b>を入力。登録済みの品名は自動で候補が出るのでタップ。</div></div>
+        <div class="man-step"><span class="man-num">③</span><div><b>問屋</b>を入力。同様に候補から選べます。</div></div>
+        <div class="man-step"><span class="man-num">④</span><div><b>数量</b>と<b>単価</b>を入力。合計金額が自動計算されます。</div></div>
+        <div class="man-step"><span class="man-num">⑤</span><div>「＋ 登録する」ボタンを押す。</div></div>
+        <div class="man-note">💡 同じ品名を再び入力すると前回の単価が自動提案されます。</div>
+      </div>
+    </div>
+
+    <!-- 積み込み確認 -->
+    <div class="man-sec" onclick="toggleMan(this)">
+      <div class="man-head"><span>🚚 積み込み確認の使い方</span><span class="man-arr">▼</span></div>
+      <div class="man-body">
+        <p style="font-size:13px;margin-bottom:10px;">入力タブで選んだ日付の仕入れリストが表示されます。トラックへの積み込み時にチェックします。</p>
+        <div class="man-step"><span class="man-num">●</span><div>各行の<span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;border:2px solid var(--success);background:var(--success);color:white;font-size:12px;vertical-align:middle;">✓</span>（丸ボタン）を押すとチェック済みになります。</div></div>
+        <div class="man-step"><span class="man-num">●</span><div>「全チェック」ですべて一括でチェック。「リセット」でその日のチェックを全部外せます。</div></div>
+        <div class="man-note">📌 チェック状態は日付ごとに保存されます。</div>
+      </div>
+    </div>
+
+    <!-- 仕入れ確認リスト -->
+    <div class="man-sec" onclick="toggleMan(this)">
+      <div class="man-head"><span>📋 仕入れ確認リストの使い方</span><span class="man-arr">▼</span></div>
+      <div class="man-body">
+        <p style="font-size:13px;margin-bottom:10px;">問屋さんと仕入れ内容を照合するときに使います。日付は自由に選べます。</p>
+        <div class="man-step"><span class="man-num">①</span><div>カレンダーで確認したい日付を選ぶ。</div></div>
+        <div class="man-step"><span class="man-num">②</span><div>問屋ごとにグループ分けされた一覧が表示されます。</div></div>
+        <div class="man-step"><span class="man-num">③</span><div><span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:6px;border:2px solid var(--accent);background:var(--accent);color:white;font-size:12px;vertical-align:middle;">✓</span>（四角ボタン）を押して確認済みにしていく。</div></div>
+        <div class="man-step"><span class="man-num">④</span><div>全品目が確認済みになると「✅ すべて確認済み」と表示されます。</div></div>
+        <div class="man-note">📌 積み込み確認と仕入れ確認リストはそれぞれ独立しています。</div>
+      </div>
+    </div>
+
+    <!-- 一覧タブ -->
+    <div class="man-sec" onclick="toggleMan(this)">
+      <div class="man-head"><span>📋 一覧タブの使い方</span><span class="man-arr">▼</span></div>
+      <div class="man-body">
+        <div class="man-step"><span class="man-num">●</span><div>登録したすべての仕入れが日付の新しい順に表示されます。</div></div>
+        <div class="man-step"><span class="man-num">●</span><div>上部の検索欄で品名や問屋名を絞り込めます。</div></div>
+        <div class="man-step"><span class="man-num">●</span><div>各項目の<b>✏️ 編集</b>ボタンで数量・単価・日付などを後から修正できます。</div></div>
+        <div class="man-step"><span class="man-num">●</span><div>🗑️ ボタンで削除。削除は取り消せないので注意。</div></div>
+      </div>
+    </div>
+
+    <!-- 集計タブ -->
+    <div class="man-sec" onclick="toggleMan(this)">
+      <div class="man-head"><span>📊 集計タブの使い方</span><span class="man-arr">▼</span></div>
+      <div class="man-body">
+        <div class="man-step"><span class="man-num">●</span><div>合計仕入金額と件数がひと目でわかります。</div></div>
+        <div class="man-step"><span class="man-num">●</span><div>日別・品名別・問屋別の集計が確認できます。</div></div>
+        <div class="man-step"><span class="man-num">●</span><div>日別カードをタップすると明細が展開されます。</div></div>
+        <div class="man-step"><span class="man-num">●</span><div>「📥 全データをCSV出力」でExcel用のファイルをダウンロードできます（バックアップにも活用できます）。</div></div>
+      </div>
+    </div>
+
+    <!-- 売価計算タブ -->
+    <div class="man-sec" onclick="toggleMan(this)">
+      <div class="man-head"><span>💰 売価計算の使い方</span><span class="man-arr">▼</span></div>
+      <div class="man-body">
+        <div class="man-step"><span class="man-num">①</span><div>仕入れ記録から読み込むか、仕入れ金額を直接入力します。</div></div>
+        <div class="man-step"><span class="man-num">②</span><div>手数料・分割数・値入率を入力すると推奨売価が自動計算されます。</div></div>
+        <div class="man-step"><span class="man-num">③</span><div>値入率別の売価一覧表も表示されるので価格設定の参考になります。</div></div>
+        <div class="man-note">💡 手数料や値入率のデフォルト値は「管理 → ⚙️ 売価計算の初期設定」で保存できます。</div>
+      </div>
+    </div>
+
+    <!-- 管理タブ -->
+    <div class="man-sec" onclick="toggleMan(this)">
+      <div class="man-head"><span>⚙️ 管理タブの使い方</span><span class="man-arr">▼</span></div>
+      <div class="man-body">
+        <div class="man-step"><span class="man-num">●</span><div><b>🏪 店名設定</b>：店名を入力して保存するとアプリのタイトルとアイコンに反映されます。</div></div>
+        <div class="man-step"><span class="man-num">●</span><div><b>📥 CSVエクスポート</b>：月を選んで特定の月だけ出力することもできます。</div></div>
+        <div class="man-step"><span class="man-num">●</span><div><b>🐟 品名マスタ</b>：よく仕入れる品名を登録しておくと入力時に候補として出てきます。</div></div>
+        <div class="man-step"><span class="man-num">●</span><div><b>🏪 問屋マスタ</b>：問屋名も同様に登録できます。</div></div>
+      </div>
+    </div>
+
+    <!-- バックアップ -->
+    <div class="man-sec" onclick="toggleMan(this)">
+      <div class="man-head"><span>💾 バックアップの取り方</span><span class="man-arr">▼</span></div>
+      <div class="man-body">
+        <div class="man-step"><span class="man-num">①</span><div>「集計タブ」または「管理タブ」の <b>📥 全データをCSV出力</b> を押す。</div></div>
+        <div class="man-step"><span class="man-num">②</span><div>ダウンロードしたCSVファイルをiCloud Driveやメールなどでバックアップしておきます。</div></div>
+        <div class="man-step"><span class="man-num">③</span><div>万が一データが消えてもCSVファイルがあれば内容を確認できます。</div></div>
+        <div class="man-note">⚠️ データはこのiPhone（Safari）に保存されています。機種変更や「履歴とWebサイトデータを消去」を行うと消えますので定期的にCSV出力しておくことをおすすめします。</div>
+      </div>
+    </div>
+
   </div>
 
   <!-- 開発者情報 -->
@@ -1216,261 +1346,4 @@ function sw(name, btn) {
 function updateExpMonths() {
   const months=[...new Set(LS.records().map(r=>r.date.slice(0,7)))].sort().reverse();
   const sel=document.getElementById('exp-month'); const cur=sel.value;
-  sel.innerHTML='<option value="">すべての月</option>';
-  months.forEach(m=>{
-    const o=document.createElement('option');
-    o.value=m; o.textContent=m.replace('-','年')+'月';
-    if(m===cur) o.selected=true;
-    sel.appendChild(o);
-  });
-}
-
-// ===== トースト =====
-function showToast(msg) {
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2500);
-}
-
-// ===== PWAアイコン（モダンデザイン） =====
-function setupPWAIcon(shopName) {
-  if (shopName === undefined) shopName = loadShopName();
-  const S = 512;
-  const canvas = document.createElement('canvas');
-  canvas.width = S; canvas.height = S;
-  const ctx = canvas.getContext('2d');
-
-  // 角丸クリップ
-  const rad = S * 0.22;
-  ctx.beginPath();
-  ctx.moveTo(rad, 0); ctx.lineTo(S-rad, 0);
-  ctx.arcTo(S,0,S,rad,rad); ctx.lineTo(S,S-rad);
-  ctx.arcTo(S,S,S-rad,S,rad); ctx.lineTo(rad,S);
-  ctx.arcTo(0,S,0,S-rad,rad); ctx.lineTo(0,rad);
-  ctx.arcTo(0,0,rad,0,rad); ctx.closePath();
-  ctx.save(); ctx.clip();
-
-  // 背景：深みのあるネイビー→シアングラデーション
-  const bg = ctx.createLinearGradient(0, 0, S, S);
-  bg.addColorStop(0, '#0a2342');
-  bg.addColorStop(0.5, '#1a5276');
-  bg.addColorStop(1, '#0e6655');
-  ctx.fillStyle = bg; ctx.fillRect(0,0,S,S);
-
-  // 右下の光彩
-  const glow = ctx.createRadialGradient(S*0.75, S*0.75, 0, S*0.75, S*0.75, S*0.5);
-  glow.addColorStop(0, 'rgba(22,160,133,0.35)');
-  glow.addColorStop(1, 'rgba(0,0,0,0)');
-  ctx.fillStyle = glow; ctx.fillRect(0,0,S,S);
-
-  // 波（下部）
-  ctx.beginPath();
-  ctx.moveTo(0, S*0.78);
-  ctx.bezierCurveTo(S*0.25,S*0.68, S*0.55,S*0.85, S,S*0.72);
-  ctx.lineTo(S,S); ctx.lineTo(0,S); ctx.closePath();
-  ctx.fillStyle = 'rgba(255,255,255,0.06)'; ctx.fill();
-
-  ctx.beginPath();
-  ctx.moveTo(0, S*0.88);
-  ctx.bezierCurveTo(S*0.30,S*0.80, S*0.65,S*0.94, S,S*0.84);
-  ctx.lineTo(S,S); ctx.lineTo(0,S); ctx.closePath();
-  ctx.fillStyle = 'rgba(255,255,255,0.04)'; ctx.fill();
-
-  // 魚（モダン・フラット）
-  ctx.save();
-  ctx.translate(S*0.48, S*0.42);
-
-  // 尾ひれ
-  ctx.beginPath();
-  ctx.moveTo(S*0.18, 0);
-  ctx.lineTo(S*0.30, -S*0.10);
-  ctx.lineTo(S*0.32, 0);
-  ctx.lineTo(S*0.30, S*0.10);
-  ctx.closePath();
-  const tailGrad = ctx.createLinearGradient(S*0.18,0,S*0.32,0);
-  tailGrad.addColorStop(0,'rgba(255,255,255,0.6)');
-  tailGrad.addColorStop(1,'rgba(255,255,255,0.3)');
-  ctx.fillStyle = tailGrad; ctx.fill();
-
-  // 胴体
-  ctx.beginPath();
-  ctx.ellipse(0, 0, S*0.19, S*0.10, 0, 0, Math.PI*2);
-  const bodyGrad = ctx.createLinearGradient(-S*0.19,0,S*0.19,0);
-  bodyGrad.addColorStop(0,'rgba(255,255,255,0.95)');
-  bodyGrad.addColorStop(1,'rgba(200,230,255,0.90)');
-  ctx.fillStyle = bodyGrad; ctx.fill();
-
-  // 背びれ
-  ctx.beginPath();
-  ctx.moveTo(-S*0.04, -S*0.09);
-  ctx.bezierCurveTo(S*0.04,-S*0.18, S*0.12,-S*0.18, S*0.14,-S*0.09);
-  ctx.closePath();
-  ctx.fillStyle='rgba(255,255,255,0.55)'; ctx.fill();
-
-  // 目
-  ctx.beginPath();
-  ctx.arc(-S*0.12, -S*0.02, S*0.025, 0, Math.PI*2);
-  ctx.fillStyle='#0a2342'; ctx.fill();
-  ctx.beginPath();
-  ctx.arc(-S*0.125, -S*0.03, S*0.009, 0, Math.PI*2);
-  ctx.fillStyle='rgba(255,255,255,0.9)'; ctx.fill();
-
-  // ウロコ（小さな半円）
-  for(let i=0;i<3;i++){
-    ctx.beginPath();
-    ctx.arc(-S*0.02+i*S*0.055, S*0.01, S*0.028, Math.PI, 0);
-    ctx.strokeStyle='rgba(100,180,255,0.4)';
-    ctx.lineWidth=2;
-    ctx.stroke();
-  }
-  ctx.restore();
-
-  // テキスト（店名）
-  ctx.textAlign = 'center';
-  ctx.shadowColor = 'rgba(0,0,0,0.4)';
-  ctx.shadowBlur = 8;
-  ctx.fillStyle = 'white';
-  const displayName = shopName || '仕入帳';
-  const fontSize = displayName.length > 5 ? S*0.09 : S*0.115;
-  ctx.font = `800 ${fontSize}px "Hiragino Sans","Noto Sans JP",sans-serif`;
-  ctx.fillText(displayName, S*0.5, S*0.80);
-
-  // サブ「仕入帳」（店名がある場合のみ）
-  if (shopName) {
-    ctx.shadowBlur = 0;
-    ctx.font = `500 ${S*0.065}px "Hiragino Sans","Noto Sans JP",sans-serif`;
-    ctx.fillStyle = 'rgba(150,220,210,0.9)';
-    ctx.fillText('仕 入 帳', S*0.5, S*0.91);
-  }
-
-  ctx.restore();
-
-  const iconData = canvas.toDataURL('image/png');
-  let link = document.querySelector("link[rel='apple-touch-icon']");
-  if (!link) { link=document.createElement('link'); link.rel='apple-touch-icon'; document.head.appendChild(link); }
-  link.href = iconData;
-
-  const appName = shopName ? shopName + ' 仕入帳' : '仕入帳';
-  const manifest = {
-    name: appName, short_name: shopName || '仕入帳',
-    start_url:'./', display:'standalone',
-    background_color:'#0a2342', theme_color:'#1a5276',
-    icons:[{src:iconData, sizes:'512x512', type:'image/png'}]
-  };
-  const blob = new Blob([JSON.stringify(manifest)],{type:'application/json'});
-  let mlink = document.querySelector("link[rel='manifest']");
-  if (!mlink) { mlink=document.createElement('link'); mlink.rel='manifest'; document.head.appendChild(mlink); }
-  mlink.href = URL.createObjectURL(blob);
-}
-
-// ===== カスタムカレンダー =====
-let calTarget = null, calYear = new Date().getFullYear(), calMonth = new Date().getMonth();
-function openCal(targetId) {
-  calTarget = targetId;
-  const val = document.getElementById(targetId).value || today();
-  calYear = parseInt(val.split('-')[0]);
-  calMonth = parseInt(val.split('-')[1]) - 1;
-  renderCal();
-  document.getElementById('cal-modal').classList.add('show');
-}
-function closeCal() { document.getElementById('cal-modal').classList.remove('show'); }
-function closeCalOutside(e) { if (e.target===document.getElementById('cal-modal')) closeCal(); }
-function prevMonth() { calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCal(); }
-function nextMonth() { calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCal(); }
-function renderCal() {
-  const recordDates = new Set(LS.records().map(r=>r.date));
-  const selectedVal = document.getElementById(calTarget).value;
-  const todayStr = today();
-  const months=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
-  document.getElementById('cal-title').textContent = `${calYear}年 ${months[calMonth]}`;
-  const firstDay = new Date(calYear, calMonth, 1).getDay();
-  const lastDate = new Date(calYear, calMonth+1, 0).getDate();
-  const prevLastDate = new Date(calYear, calMonth, 0).getDate();
-  const dow = ['日','月','火','水','木','金','土'];
-  let html = dow.map((d,i)=>`<div class="cal-dow" style="${i===0?'color:var(--danger)':i===6?'color:var(--primary)':''}">${d}</div>`).join('');
-  // 前月
-  for(let i=0;i<firstDay;i++){
-    const d=prevLastDate-firstDay+1+i;
-    const pm=calMonth===0?12:calMonth; const py=calMonth===0?calYear-1:calYear;
-    const ds=`${py}-${String(pm).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    html+=`<div class="cal-day other-month${recordDates.has(ds)?' has-records':''}${ds===selectedVal?' selected':''}" onclick="selectCalDate('${ds}')">${d}</div>`;
-  }
-  // 当月
-  for(let d=1;d<=lastDate;d++){
-    const ds=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    let cls='cal-day';
-    if(recordDates.has(ds)) cls+=' has-records';
-    if(ds===selectedVal) cls+=' selected';
-    if(ds===todayStr) cls+=' is-today';
-    const isSun = new Date(calYear,calMonth,d).getDay()===0;
-    const isSat = new Date(calYear,calMonth,d).getDay()===6;
-    const color = ds===selectedVal?'' : isSun?'color:var(--danger);':isSat?'color:var(--primary);':'';
-    html+=`<div class="${cls}" style="${color}" onclick="selectCalDate('${ds}')">${d}</div>`;
-  }
-  // 翌月
-  const total=Math.ceil((firstDay+lastDate)/7)*7;
-  for(let d=1;d<=total-firstDay-lastDate;d++){
-    const nm=calMonth===11?1:calMonth+2; const ny=calMonth===11?calYear+1:calYear;
-    const ds=`${ny}-${String(nm).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    html+=`<div class="cal-day other-month${recordDates.has(ds)?' has-records':''}${ds===selectedVal?' selected':''}" onclick="selectCalDate('${ds}')">${d}</div>`;
-  }
-  document.getElementById('cal-grid').innerHTML = html;
-}
-function selectCalDate(dateStr) {
-  document.getElementById(calTarget).value = dateStr;
-  const disp = document.getElementById(calTarget+'-display');
-  if(disp) disp.textContent = fmtFull(dateStr);
-  closeCal();
-  if(calTarget==='inp-date') renderTodayQuick();
-  else if(calTarget==='verify-date') renderVerifySection();
-}
-
-// ===== 店名 =====
-function loadShopName() { return localStorage.getItem('sk_shop') || ''; }
-function saveShopName() {
-  const name = document.getElementById('shop-name-input').value.trim();
-  if (!name) { showToast('⚠️ 店名を入力してください'); return; }
-  localStorage.setItem('sk_shop', name);
-  applyShopName(name);
-  showToast('✅ 店名を保存しました');
-}
-function applyShopName(name) {
-  const title = name ? name + ' 仕入帳' : '仕入帳';
-  document.getElementById('shop-title').textContent = title;
-  document.title = title;
-  setupPWAIcon(name);
-}
-
-// ===== 初期化 =====
-function init() {
-  const t=today();
-  document.getElementById('inp-date').value    = t;
-  document.getElementById('verify-date').value = t;
-  document.getElementById('inp-date-display').textContent    = fmtFull(t);
-  document.getElementById('verify-date-display').textContent = fmtFull(t);
-  document.getElementById('hdate').textContent = fmtFull(t);
-  refreshDL();
-  renderTodayQuick();
-  renderVerifySection();
-  // 店名を反映
-  const shopName = loadShopName();
-  if (shopName) {
-    document.getElementById('shop-name-input').value = shopName;
-    applyShopName(shopName);
-  } else {
-    setupPWAIcon('');
-  }
-}
-init();
-</script>
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="小川鮮魚">
-<script>
-// ===== サービスワーカー登録（オフライン対応） =====
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(()=>{});
-}
-</script>
-</body>
-</html>
+  sel.innerHTML='<option v
