@@ -1,4 +1,4 @@
-const CACHE = 'ogawa-v1';
+const CACHE = 'ogawa-v2';
 const FILES = ['./index.html'];
 
 self.addEventListener('install', e => {
