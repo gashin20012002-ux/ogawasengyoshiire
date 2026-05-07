@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>小川鮮魚 仕入帳</title>
+<title>仕入帳</title>
 <style>
   :root {
     --primary: #0077b6;
@@ -266,7 +266,7 @@
 <body>
 <header>
   <span class="logo">🐟</span>
-  <h1>小川鮮魚 仕入帳</h1>
+  <h1 id="shop-title">仕入帳</h1>
   <div class="hdate" id="hdate"></div>
 </header>
 
@@ -385,6 +385,16 @@
 
 <!-- ========== 管理タブ ========== -->
 <div class="tab" id="tab-master">
+  <!-- 店名設定 -->
+  <div class="card">
+    <div class="card-title">🏪 店名設定</div>
+    <div class="form-group">
+      <label>店名</label>
+      <input type="text" id="shop-name-input" placeholder="例：小川鮮魚" inputmode="text">
+    </div>
+    <button onclick="saveShopName()" style="width:100%;padding:13px;background:var(--primary);color:white;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer">💾 店名を保存</button>
+  </div>
+
   <div class="card">
     <div class="card-title">📥 CSVエクスポート（Excel用）</div>
     <div style="margin-bottom:12px">
@@ -423,6 +433,24 @@
     </div>
     <button onclick="saveSettings()" style="width:100%;padding:13px;background:var(--primary);color:white;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer">💾 設定を保存</button>
   </div>
+  <!-- 開発者情報 -->
+  <div class="card" style="background:linear-gradient(135deg,#0a2342,#1a5276);color:white;">
+    <div style="font-size:13px;font-weight:700;opacity:0.7;margin-bottom:12px;">ℹ️ このアプリについて</div>
+    <div style="font-size:22px;font-weight:900;margin-bottom:4px;">🐟 鮮魚仕入帳</div>
+    <div style="font-size:13px;opacity:0.8;margin-bottom:16px;">鮮魚業向け仕入れ管理アプリ</div>
+    <div style="background:rgba(255,255,255,0.1);border-radius:10px;padding:12px;">
+      <div style="font-size:11px;opacity:0.7;margin-bottom:4px;">開発者</div>
+      <div style="font-size:16px;font-weight:800;">㈱小川鮮魚</div>
+    </div>
+    <div style="background:rgba(255,255,255,0.1);border-radius:10px;padding:12px;margin-top:8px;">
+      <div style="font-size:11px;opacity:0.7;margin-bottom:4px;">初回リリース</div>
+      <div style="font-size:16px;font-weight:800;">2026年5月</div>
+    </div>
+    <div style="font-size:11px;opacity:0.5;margin-top:12px;text-align:center;">
+      © 2026 ㈱小川鮮魚 All rights reserved.
+    </div>
+  </div>
+
   <div class="card">
     <div class="card-title">🐟 品名マスタ</div>
     <div class="tag-list" id="name-tags"></div>
@@ -1163,7 +1191,8 @@ function showToast(msg) {
 }
 
 // ===== PWAアイコン（モダンデザイン） =====
-function setupPWAIcon() {
+function setupPWAIcon(shopName) {
+  if (shopName === undefined) shopName = loadShopName();
   const S = 512;
   const canvas = document.createElement('canvas');
   canvas.width = S; canvas.height = S;
@@ -1254,19 +1283,23 @@ function setupPWAIcon() {
   }
   ctx.restore();
 
-  // テキスト「小川鮮魚」
+  // テキスト（店名）
   ctx.textAlign = 'center';
   ctx.shadowColor = 'rgba(0,0,0,0.4)';
   ctx.shadowBlur = 8;
   ctx.fillStyle = 'white';
-  ctx.font = `800 ${S*0.115}px "Hiragino Sans","Noto Sans JP",sans-serif`;
-  ctx.fillText('小川鮮魚', S*0.5, S*0.80);
+  const displayName = shopName || '仕入帳';
+  const fontSize = displayName.length > 5 ? S*0.09 : S*0.115;
+  ctx.font = `800 ${fontSize}px "Hiragino Sans","Noto Sans JP",sans-serif`;
+  ctx.fillText(displayName, S*0.5, S*0.80);
 
-  // サブ「仕入帳」
-  ctx.shadowBlur = 0;
-  ctx.font = `500 ${S*0.065}px "Hiragino Sans","Noto Sans JP",sans-serif`;
-  ctx.fillStyle = 'rgba(150,220,210,0.9)';
-  ctx.fillText('仕 入 帳', S*0.5, S*0.91);
+  // サブ「仕入帳」（店名がある場合のみ）
+  if (shopName) {
+    ctx.shadowBlur = 0;
+    ctx.font = `500 ${S*0.065}px "Hiragino Sans","Noto Sans JP",sans-serif`;
+    ctx.fillStyle = 'rgba(150,220,210,0.9)';
+    ctx.fillText('仕 入 帳', S*0.5, S*0.91);
+  }
 
   ctx.restore();
 
@@ -1275,8 +1308,9 @@ function setupPWAIcon() {
   if (!link) { link=document.createElement('link'); link.rel='apple-touch-icon'; document.head.appendChild(link); }
   link.href = iconData;
 
+  const appName = shopName ? shopName + ' 仕入帳' : '仕入帳';
   const manifest = {
-    name:'小川鮮魚 仕入帳', short_name:'小川鮮魚',
+    name: appName, short_name: shopName || '仕入帳',
     start_url:'./', display:'standalone',
     background_color:'#0a2342', theme_color:'#1a5276',
     icons:[{src:iconData, sizes:'512x512', type:'image/png'}]
@@ -1285,6 +1319,22 @@ function setupPWAIcon() {
   let mlink = document.querySelector("link[rel='manifest']");
   if (!mlink) { mlink=document.createElement('link'); mlink.rel='manifest'; document.head.appendChild(mlink); }
   mlink.href = URL.createObjectURL(blob);
+}
+
+// ===== 店名 =====
+function loadShopName() { return localStorage.getItem('sk_shop') || ''; }
+function saveShopName() {
+  const name = document.getElementById('shop-name-input').value.trim();
+  if (!name) { showToast('⚠️ 店名を入力してください'); return; }
+  localStorage.setItem('sk_shop', name);
+  applyShopName(name);
+  showToast('✅ 店名を保存しました');
+}
+function applyShopName(name) {
+  const title = name ? name + ' 仕入帳' : '仕入帳';
+  document.getElementById('shop-title').textContent = title;
+  document.title = title;
+  setupPWAIcon(name);
 }
 
 // ===== 初期化 =====
@@ -1296,7 +1346,14 @@ function init() {
   refreshDL();
   renderTodayQuick();
   renderVerifySection();
-  setupPWAIcon();
+  // 店名を反映
+  const shopName = loadShopName();
+  if (shopName) {
+    document.getElementById('shop-name-input').value = shopName;
+    applyShopName(shopName);
+  } else {
+    setupPWAIcon('');
+  }
 }
 init();
 </script>
