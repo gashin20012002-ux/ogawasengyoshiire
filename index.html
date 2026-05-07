@@ -1387,7 +1387,7 @@ function renderCal() {
   const lastDate = new Date(calYear, calMonth+1, 0).getDate();
   const prevLastDate = new Date(calYear, calMonth, 0).getDate();
   const dow = ['日','月','火','水','木','金','土'];
-  let html = dow.map(d=>`<div class="cal-dow${d==='日'?' style="color:var(--danger)"':d==='土'?' style="color:var(--primary)"':''}">${d}</div>`).join('');
+  let html = dow.map((d,i)=>`<div class="cal-dow" style="${i===0?'color:var(--danger)':i===6?'color:var(--primary)':''}">${d}</div>`).join('');
   // 前月
   for(let i=0;i<firstDay;i++){
     const d=prevLastDate-firstDay+1+i;
