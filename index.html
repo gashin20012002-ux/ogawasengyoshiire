@@ -1346,4 +1346,231 @@ function sw(name, btn) {
 function updateExpMonths() {
   const months=[...new Set(LS.records().map(r=>r.date.slice(0,7)))].sort().reverse();
   const sel=document.getElementById('exp-month'); const cur=sel.value;
-  sel.innerHTML='<option v
+  sel.innerHTML='<option value="">すべての月</option>';
+  months.forEach(m=>{
+    const o=document.createElement('option');
+    o.value=m; o.textContent=m.replace('-','年')+'月';
+    if(m===cur) o.selected=true;
+    sel.appendChild(o);
+  });
+}
+
+// ===== トースト =====
+function showToast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ===== PWAアイコン =====
+function setupPWAIcon(shopName) {
+  if (shopName === undefined) shopName = loadShopName();
+  const S = 512;
+  const canvas = document.createElement('canvas');
+  canvas.width = S; canvas.height = S;
+  const ctx = canvas.getContext('2d');
+  const rad = S * 0.22;
+  ctx.beginPath();
+  ctx.moveTo(rad, 0); ctx.lineTo(S-rad, 0);
+  ctx.arcTo(S,0,S,rad,rad); ctx.lineTo(S,S-rad);
+  ctx.arcTo(S,S,S-rad,S,rad); ctx.lineTo(rad,S);
+  ctx.arcTo(0,S,0,S-rad,rad); ctx.lineTo(0,rad);
+  ctx.arcTo(0,0,rad,0,rad); ctx.closePath();
+  ctx.save(); ctx.clip();
+  const bg = ctx.createLinearGradient(0, 0, S, S);
+  bg.addColorStop(0, '#0a2342');
+  bg.addColorStop(0.5, '#1a5276');
+  bg.addColorStop(1, '#0e6655');
+  ctx.fillStyle = bg; ctx.fillRect(0,0,S,S);
+  const glow = ctx.createRadialGradient(S*0.75, S*0.75, 0, S*0.75, S*0.75, S*0.5);
+  glow.addColorStop(0, 'rgba(22,160,133,0.35)');
+  glow.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = glow; ctx.fillRect(0,0,S,S);
+  ctx.beginPath();
+  ctx.moveTo(0, S*0.78);
+  ctx.bezierCurveTo(S*0.25,S*0.68, S*0.55,S*0.85, S,S*0.72);
+  ctx.lineTo(S,S); ctx.lineTo(0,S); ctx.closePath();
+  ctx.fillStyle = 'rgba(255,255,255,0.06)'; ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(0, S*0.88);
+  ctx.bezierCurveTo(S*0.30,S*0.80, S*0.65,S*0.94, S,S*0.84);
+  ctx.lineTo(S,S); ctx.lineTo(0,S); ctx.closePath();
+  ctx.fillStyle = 'rgba(255,255,255,0.04)'; ctx.fill();
+  ctx.save();
+  ctx.translate(S*0.48, S*0.42);
+  ctx.beginPath();
+  ctx.moveTo(S*0.18, 0);
+  ctx.lineTo(S*0.30, -S*0.10);
+  ctx.lineTo(S*0.32, 0);
+  ctx.lineTo(S*0.30, S*0.10);
+  ctx.closePath();
+  const tailGrad = ctx.createLinearGradient(S*0.18,0,S*0.32,0);
+  tailGrad.addColorStop(0,'rgba(255,255,255,0.6)');
+  tailGrad.addColorStop(1,'rgba(255,255,255,0.3)');
+  ctx.fillStyle = tailGrad; ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(0, 0, S*0.19, S*0.10, 0, 0, Math.PI*2);
+  const bodyGrad = ctx.createLinearGradient(-S*0.19,0,S*0.19,0);
+  bodyGrad.addColorStop(0,'rgba(255,255,255,0.95)');
+  bodyGrad.addColorStop(1,'rgba(200,230,255,0.90)');
+  ctx.fillStyle = bodyGrad; ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(-S*0.04, -S*0.09);
+  ctx.bezierCurveTo(S*0.04,-S*0.18, S*0.12,-S*0.18, S*0.14,-S*0.09);
+  ctx.closePath();
+  ctx.fillStyle='rgba(255,255,255,0.55)'; ctx.fill();
+  ctx.beginPath();
+  ctx.arc(-S*0.12, -S*0.02, S*0.025, 0, Math.PI*2);
+  ctx.fillStyle='#0a2342'; ctx.fill();
+  ctx.beginPath();
+  ctx.arc(-S*0.125, -S*0.03, S*0.009, 0, Math.PI*2);
+  ctx.fillStyle='rgba(255,255,255,0.9)'; ctx.fill();
+  for(let i=0;i<3;i++){
+    ctx.beginPath();
+    ctx.arc(-S*0.02+i*S*0.055, S*0.01, S*0.028, Math.PI, 0);
+    ctx.strokeStyle='rgba(100,180,255,0.4)';
+    ctx.lineWidth=2;
+    ctx.stroke();
+  }
+  ctx.restore();
+  ctx.textAlign = 'center';
+  ctx.shadowColor = 'rgba(0,0,0,0.4)';
+  ctx.shadowBlur = 8;
+  ctx.fillStyle = 'white';
+  const displayName = shopName || '仕入帳';
+  const fontSize = displayName.length > 5 ? S*0.09 : S*0.115;
+  ctx.font = `800 ${fontSize}px "Hiragino Sans","Noto Sans JP",sans-serif`;
+  ctx.fillText(displayName, S*0.5, S*0.80);
+  if (shopName) {
+    ctx.shadowBlur = 0;
+    ctx.font = `500 ${S*0.065}px "Hiragino Sans","Noto Sans JP",sans-serif`;
+    ctx.fillStyle = 'rgba(150,220,210,0.9)';
+    ctx.fillText('仕 入 帳', S*0.5, S*0.91);
+  }
+  ctx.restore();
+  const iconData = canvas.toDataURL('image/png');
+  let link = document.querySelector("link[rel='apple-touch-icon']");
+  if (!link) { link=document.createElement('link'); link.rel='apple-touch-icon'; document.head.appendChild(link); }
+  link.href = iconData;
+  const appName = shopName ? shopName + ' 仕入帳' : '仕入帳';
+  const manifest = {
+    name: appName, short_name: shopName || '仕入帳',
+    start_url:'./', display:'standalone',
+    background_color:'#0a2342', theme_color:'#1a5276',
+    icons:[{src:iconData, sizes:'512x512', type:'image/png'}]
+  };
+  const blob = new Blob([JSON.stringify(manifest)],{type:'application/json'});
+  let mlink = document.querySelector("link[rel='manifest']");
+  if (!mlink) { mlink=document.createElement('link'); mlink.rel='manifest'; document.head.appendChild(mlink); }
+  mlink.href = URL.createObjectURL(blob);
+}
+
+// ===== カスタムカレンダー =====
+let calTarget = null, calYear = new Date().getFullYear(), calMonth = new Date().getMonth();
+function openCal(targetId) {
+  calTarget = targetId;
+  const val = document.getElementById(targetId).value || today();
+  calYear = parseInt(val.split('-')[0]);
+  calMonth = parseInt(val.split('-')[1]) - 1;
+  renderCal();
+  document.getElementById('cal-modal').classList.add('show');
+}
+function closeCal() { document.getElementById('cal-modal').classList.remove('show'); }
+function closeCalOutside(e) { if (e.target===document.getElementById('cal-modal')) closeCal(); }
+function prevMonth() { calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCal(); }
+function nextMonth() { calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCal(); }
+function renderCal() {
+  const recordDates = new Set(LS.records().map(r=>r.date));
+  const selectedVal = document.getElementById(calTarget).value;
+  const todayStr = today();
+  const months=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  document.getElementById('cal-title').textContent = `${calYear}年 ${months[calMonth]}`;
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const lastDate = new Date(calYear, calMonth+1, 0).getDate();
+  const prevLastDate = new Date(calYear, calMonth, 0).getDate();
+  const dow = ['日','月','火','水','木','金','土'];
+  let html = dow.map((d,i)=>`<div class="cal-dow" style="${i===0?'color:var(--danger)':i===6?'color:var(--primary)':''}">${d}</div>`).join('');
+  for(let i=0;i<firstDay;i++){
+    const d=prevLastDate-firstDay+1+i;
+    const pm=calMonth===0?12:calMonth; const py=calMonth===0?calYear-1:calYear;
+    const ds=`${py}-${String(pm).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    html+=`<div class="cal-day other-month${recordDates.has(ds)?' has-records':''}${ds===selectedVal?' selected':''}" onclick="selectCalDate('${ds}')">${d}</div>`;
+  }
+  for(let d=1;d<=lastDate;d++){
+    const ds=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    let cls='cal-day';
+    if(recordDates.has(ds)) cls+=' has-records';
+    if(ds===selectedVal) cls+=' selected';
+    if(ds===todayStr) cls+=' is-today';
+    const isSun = new Date(calYear,calMonth,d).getDay()===0;
+    const isSat = new Date(calYear,calMonth,d).getDay()===6;
+    const color = ds===selectedVal?'' : isSun?'color:var(--danger);':isSat?'color:var(--primary);':'';
+    html+=`<div class="${cls}" style="${color}" onclick="selectCalDate('${ds}')">${d}</div>`;
+  }
+  const total=Math.ceil((firstDay+lastDate)/7)*7;
+  for(let d=1;d<=total-firstDay-lastDate;d++){
+    const nm=calMonth===11?1:calMonth+2; const ny=calMonth===11?calYear+1:calYear;
+    const ds=`${ny}-${String(nm).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    html+=`<div class="cal-day other-month${recordDates.has(ds)?' has-records':''}${ds===selectedVal?' selected':''}" onclick="selectCalDate('${ds}')">${d}</div>`;
+  }
+  document.getElementById('cal-grid').innerHTML = html;
+}
+function selectCalDate(dateStr) {
+  document.getElementById(calTarget).value = dateStr;
+  const disp = document.getElementById(calTarget+'-display');
+  if(disp) disp.textContent = fmtFull(dateStr);
+  closeCal();
+  if(calTarget==='inp-date') renderTodayQuick();
+  else if(calTarget==='verify-date') renderVerifySection();
+}
+
+// ===== 取扱説明書アコーディオン =====
+function toggleMan(el) { el.classList.toggle('open'); }
+
+// ===== 店名 =====
+function loadShopName() { return localStorage.getItem('sk_shop') || ''; }
+function saveShopName() {
+  const name = document.getElementById('shop-name-input').value.trim();
+  if (!name) { showToast('⚠️ 店名を入力してください'); return; }
+  localStorage.setItem('sk_shop', name);
+  applyShopName(name);
+  showToast('✅ 店名を保存しました');
+}
+function applyShopName(name) {
+  const title = name ? name + ' 仕入帳' : '仕入帳';
+  document.getElementById('shop-title').textContent = title;
+  document.title = title;
+  setupPWAIcon(name);
+}
+
+// ===== 初期化 =====
+function init() {
+  const t=today();
+  document.getElementById('inp-date').value    = t;
+  document.getElementById('verify-date').value = t;
+  document.getElementById('inp-date-display').textContent    = fmtFull(t);
+  document.getElementById('verify-date-display').textContent = fmtFull(t);
+  document.getElementById('hdate').textContent = fmtFull(t);
+  refreshDL();
+  renderTodayQuick();
+  renderVerifySection();
+  const shopName = loadShopName();
+  if (shopName) {
+    document.getElementById('shop-name-input').value = shopName;
+    applyShopName(shopName);
+  } else {
+    setupPWAIcon('');
+  }
+}
+init();
+</script>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="小川鮮魚">
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
